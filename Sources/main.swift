@@ -8,6 +8,7 @@
 import AppKit
 import SwiftUI
 import Combine
+import ServiceManagement
 
 // MARK: - Version / update
 
@@ -145,6 +146,19 @@ final class CooldownStore: ObservableObject {
     /// Auto-calm: when CPU stays hot, run "Calm Down" automatically. Persisted.
     @Published var autoCalm: Bool {
         didSet { UserDefaults.standard.set(autoCalm, forKey: "autoCalm") }
+    }
+
+    // --- Launch at login ---
+    @Published var launchAtLogin: Bool = (SMAppService.mainApp.status == .enabled)
+
+    func setLaunchAtLogin(_ on: Bool) {
+        do {
+            if on { try SMAppService.mainApp.register() }
+            else  { try SMAppService.mainApp.unregister() }
+        } catch {
+            statusMessage = "Start at Login failed: \(error.localizedDescription)"
+        }
+        launchAtLogin = (SMAppService.mainApp.status == .enabled)
     }
 
     // --- Update state ---
@@ -420,6 +434,7 @@ struct ContentView: View {
                     hero
                     calmButton
                     secondaryButtons
+                    launchAtLoginRow
                     if !store.scriptExists {
                         Text("cooldown.sh not found in home folder")
                             .font(.caption2).foregroundColor(HeatLevel.hot.color)
@@ -646,6 +661,29 @@ struct ContentView: View {
         }
         .buttonStyle(.bordered)
         .controlSize(.small)
+    }
+
+    private var launchAtLoginRow: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "power")
+                .font(.system(size: 12))
+                .foregroundColor(store.launchAtLogin ? store.heat.color : .secondary)
+            Text("Start at login")
+                .font(.caption)
+            Spacer()
+            Toggle("", isOn: Binding(get: { store.launchAtLogin },
+                                     set: { store.setLaunchAtLogin($0) }))
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.mini)
+                .tint(store.heat.color)
+        }
+        .padding(.horizontal, 10).padding(.vertical, 6)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 9)
+                .fill(store.launchAtLogin ? store.heat.color.opacity(0.10) : Color.primary.opacity(0.04))
+        )
     }
 
     private var quitButton: some View {

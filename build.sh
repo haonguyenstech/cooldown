@@ -16,7 +16,8 @@ for ARCH in arm64 x86_64; do
     -o "build/Cooldown-$ARCH" \
     -framework AppKit \
     -framework SwiftUI \
-    -framework Combine
+    -framework Combine \
+    -framework ServiceManagement
 done
 lipo -create -output build/Cooldown build/Cooldown-arm64 build/Cooldown-x86_64
 
