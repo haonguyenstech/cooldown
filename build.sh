@@ -21,6 +21,12 @@ for ARCH in arm64 x86_64; do
 done
 lipo -create -output build/Cooldown build/Cooldown-arm64 build/Cooldown-x86_64
 
+if [ ! -f AppIcon.icns ]; then
+  echo "Generating icon…"
+  swift gen-icon.swift
+  iconutil -c icns AppIcon.iconset -o AppIcon.icns
+fi
+
 echo "Bundling…"
 rm -rf "$BUNDLE"
 mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Resources"
