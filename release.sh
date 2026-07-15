@@ -9,7 +9,7 @@ REPO="haonguyenstech/cooldown"
 
 ./package.sh
 VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" Info.plist)
-ZIP="dist/Cooldown-$VERSION.zip"
+ZIP="dist/Cooldown.zip"   # stable asset name
 
 echo ""
 echo "Releasing v$VERSION to github.com/$REPO …"

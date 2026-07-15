@@ -412,16 +412,38 @@ struct ContentView: View {
     @ObservedObject var store: CooldownStore
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 13) {
             titleBar
-            hero
-            loadCard
-            topCard
+            // Two-column dashboard: gauge + actions on the left, metrics on the right.
+            HStack(alignment: .top, spacing: 14) {
+                VStack(spacing: 11) {
+                    hero
+                    calmButton
+                    secondaryButtons
+                    if !store.scriptExists {
+                        Text("cooldown.sh not found in home folder")
+                            .font(.caption2).foregroundColor(HeatLevel.hot.color)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .frame(width: 230)
+
+                VStack(spacing: 10) {
+                    loadCard
+                    topCard
+                }
+                .frame(maxWidth: .infinity, alignment: .top)
+            }
             if let msg = store.statusMessage { statusPill(msg) }
-            actions
+            // Bottom controls, side by side across the full width.
+            HStack(alignment: .top, spacing: 12) {
+                autoCalmRow.frame(maxWidth: .infinity)
+                updateRow.frame(maxWidth: .infinity)
+            }
+            quitButton
         }
         .padding(16)
-        .frame(width: 320)
+        .frame(width: 620)
         .background(backdrop)
         .animation(.easeInOut(duration: 0.25), value: store.statusMessage)
     }
@@ -590,53 +612,48 @@ struct ContentView: View {
 
     // MARK: Actions
 
-    private var actions: some View {
-        VStack(spacing: 9) {
-            Button(action: { store.calm() }) {
-                HStack(spacing: 6) {
-                    if store.busy != nil {
-                        ProgressView()
-                            .controlSize(.small)
-                            .colorInvert().brightness(1)   // white spinner on the tinted button
-                        Text("Calming down…").fontWeight(.semibold)
-                    } else {
-                        Image(systemName: "snowflake")
-                        Text("Calm Down").fontWeight(.semibold)
-                    }
+    private var calmButton: some View {
+        Button(action: { store.calm() }) {
+            HStack(spacing: 6) {
+                if store.busy != nil {
+                    ProgressView()
+                        .controlSize(.small)
+                        .colorInvert().brightness(1)   // white spinner on the tinted button
+                    Text("Calming down…").fontWeight(.semibold)
+                } else {
+                    Image(systemName: "snowflake")
+                    Text("Calm Down").fontWeight(.semibold)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(store.heat.color)
-            .disabled(store.busy != nil || !store.scriptExists)
-
-            HStack(spacing: 9) {
-                Button(action: { store.refresh() }) {
-                    Label("Refresh", systemImage: "arrow.clockwise").frame(maxWidth: .infinity)
-                }
-                Button(action: { store.restore() }) {
-                    Label("Restore", systemImage: "arrow.uturn.backward").frame(maxWidth: .infinity)
-                }
-                .disabled(store.busy != nil || !store.scriptExists)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-
-            autoCalmRow
-            updateRow
-
-            if !store.scriptExists {
-                Text("cooldown.sh not found in home folder")
-                    .font(.caption2).foregroundColor(HeatLevel.hot.color)
-            }
-
-            Button(action: { NSApp.terminate(nil) }) {
-                Text("Quit Cooldown").font(.caption2).foregroundColor(.secondary)
-            }
-            .buttonStyle(.plain)
-            .padding(.top, 1)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
         }
+        .buttonStyle(.borderedProminent)
+        .tint(store.heat.color)
+        .disabled(store.busy != nil || !store.scriptExists)
+    }
+
+    private var secondaryButtons: some View {
+        HStack(spacing: 9) {
+            Button(action: { store.refresh() }) {
+                Label("Refresh", systemImage: "arrow.clockwise").frame(maxWidth: .infinity)
+            }
+            Button(action: { store.restore() }) {
+                Label("Undo Calm", systemImage: "arrow.uturn.backward").frame(maxWidth: .infinity)
+            }
+            .disabled(store.busy != nil || !store.scriptExists)
+            .help("Re-enable Spotlight indexing (undo Calm Down)")
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+    }
+
+    private var quitButton: some View {
+        Button(action: { NSApp.terminate(nil) }) {
+            Text("Quit Cooldown").font(.caption2).foregroundColor(.secondary)
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 1)
     }
 
     // MARK: Auto-calm toggle
@@ -662,6 +679,7 @@ struct ContentView: View {
                 .disabled(!store.scriptExists)
         }
         .padding(.horizontal, 11).padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 9)
                 .fill(store.autoCalm ? store.heat.color.opacity(0.10) : Color.primary.opacity(0.04))
@@ -701,6 +719,7 @@ struct ContentView: View {
             }
         }
         .padding(.horizontal, 11).padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 9)
                 .fill(store.updateAvailable ? store.heat.color.opacity(0.10) : Color.primary.opacity(0.04))

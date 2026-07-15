@@ -14,11 +14,17 @@ and can calm the two chronic heat sources: Spotlight indexing and runaway CPU ho
 Wraps the `~/cooldown.sh` script for the heavy actions.
 
 ## Install / update
+One-liner (downloads, unpacks, installs to `~/Applications`, launches):
+```bash
+cd /tmp && curl -fsSL https://github.com/haonguyenstech/cooldown/releases/latest/download/Cooldown.zip -o Cooldown.zip && ditto -x -k Cooldown.zip . && bash Cooldown/Install.command
 ```
-curl -fsSL https://github.com/haonguyenstech/cooldown/releases/latest/download/Cooldown-*.zip -o /tmp/cooldown.zip
-```
-Or download the latest `Cooldown-<version>.zip` from
+Or download `Cooldown.zip` from
 [Releases](https://github.com/haonguyenstech/cooldown/releases), unzip, and run `Install.command`.
+
+> Note: the old `Cooldown-*.zip` wildcard URL does **not** work — the shell tries to
+> glob `*` locally and GitHub doesn't expand it. Use the stable `Cooldown.zip` name above.
+
+Once installed, the app self-updates: **Check** → **Update Now** in the popover.
 
 ## Build from source
 ```

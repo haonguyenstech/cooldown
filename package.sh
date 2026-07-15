@@ -1,5 +1,8 @@
 #!/bin/bash
-# Build a shareable zip: dist/Cooldown-<version>.zip (app + double-clickable installer)
+# Build a shareable zip with a STABLE name: dist/Cooldown.zip
+# (stable name so https://github.com/<repo>/releases/latest/download/Cooldown.zip
+#  always resolves — GitHub does NOT support wildcards in that URL).
+# Contents (flat, under a "Cooldown" folder): Cooldown.app + Install.command
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -7,8 +10,8 @@ cd "$(dirname "$0")"
 
 VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" Info.plist)
 APP="$HOME/Applications/Cooldown.app"
-STAGE="dist/Cooldown $VERSION"
-ZIP="dist/Cooldown-$VERSION.zip"
+STAGE="dist/Cooldown"
+ZIP="dist/Cooldown.zip"
 
 rm -rf dist
 mkdir -p "$STAGE"
@@ -33,5 +36,6 @@ echo "==> Done. Cooldown is running in your menu bar."
 EOF
 chmod +x "$STAGE/Install.command"
 
-( cd dist && ditto -c -k --keepParent "Cooldown $VERSION" "Cooldown-$VERSION.zip" )
-echo "Packaged: $ZIP"
+# ditto keeps the app bundle intact; --keepParent puts everything under "Cooldown/".
+( cd dist && ditto -c -k --keepParent Cooldown Cooldown.zip )
+echo "Packaged: $ZIP (version $VERSION)"
