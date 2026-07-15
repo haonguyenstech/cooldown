@@ -4,9 +4,9 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 APP_NAME="Cooldown"
-BUNDLE="$HOME/Applications/$APP_NAME.app"
+BUNDLE="/Applications/$APP_NAME.app"
 
-mkdir -p build "$HOME/Applications"
+mkdir -p build
 
 echo "Compiling (universal: arm64 + x86_64)…"
 for ARCH in arm64 x86_64; do

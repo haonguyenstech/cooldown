@@ -9,7 +9,7 @@ cd "$(dirname "$0")"
 ./build.sh
 
 VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" Info.plist)
-APP="$HOME/Applications/Cooldown.app"
+APP="/Applications/Cooldown.app"
 STAGE="dist/Cooldown"
 ZIP="dist/Cooldown.zip"
 
@@ -23,7 +23,7 @@ cat > "$STAGE/Install.command" <<'EOF'
 set -e
 cd "$(dirname "$0")"
 APP="Cooldown.app"
-DEST="$HOME/Applications"
+DEST="/Applications"
 echo "==> Installing $APP to $DEST …"
 mkdir -p "$DEST"
 pkill -x Cooldown 2>/dev/null || true

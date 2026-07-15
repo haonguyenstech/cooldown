@@ -9,7 +9,15 @@ set -e
 REPO="haonguyenstech/cooldown"
 API="https://api.github.com/repos/$REPO/releases/latest"
 APP="Cooldown.app"
-DEST="$HOME/Applications"
+
+# Prefer /Applications (shows in Launchpad + Applications folder); fall back to
+# ~/Applications if /Applications isn't writable (non-admin users).
+if mkdir -p /Applications 2>/dev/null && [ -w /Applications ]; then
+  DEST="/Applications"
+else
+  DEST="$HOME/Applications"
+  mkdir -p "$DEST"
+fi
 
 echo "==> Looking up the latest version…"
 JSON=$(/usr/bin/curl -fsSL -H "Accept: application/vnd.github+json" "$API")
@@ -33,6 +41,8 @@ pkill -x Cooldown 2>/dev/null || true
 sleep 1
 rm -rf "$DEST/$APP"
 /usr/bin/ditto "$SRC" "$DEST/$APP"
+# Remove a stale copy from the other Applications folder to avoid duplicates.
+[ "$DEST" = "/Applications" ] && rm -rf "$HOME/Applications/$APP" 2>/dev/null || true
 # Strip the Gatekeeper quarantine flag so the app opens without warnings.
 /usr/bin/xattr -dr com.apple.quarantine "$DEST/$APP" 2>/dev/null || true
 rm -rf "$TMP"

@@ -14,7 +14,9 @@ import ServiceManagement
 
 let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
 let updateRepo = "haonguyenstech/cooldown"                       // public releases repo
-let installedAppPath = NSHomeDirectory() + "/Applications/Cooldown.app"
+// Self-update replaces the app in place, wherever it's installed (/Applications
+// or ~/Applications), by targeting the running bundle's own path.
+let installedAppPath = Bundle.main.bundlePath
 
 /// Compare dotted version strings: is `a` newer than `b`?
 func isNewer(_ a: String, than b: String) -> Bool {
